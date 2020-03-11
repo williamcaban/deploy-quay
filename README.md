@@ -32,10 +32,22 @@ The documented steps assumes:
     sudo podman inspect quay-mysql --format {{.NetworkSettings.IPAddress}}
     sudo podman inspect quay-redis --format {{.NetworkSettings.IPAddress}}
     ```
-- Edit DNS.1 and IP.1 entries of `openssl.cnf` to match the environment:
+- Go into the `./ssl` directory to configure SSL parameters
     ```
+    cd ./ssl
+    ```
+- Copy the openssl configuration to `openssl.cnf`
+    ```
+    cp openssl-UPDATETHIS.cnf openssl.cnf
+    ```
+- Edit the CN, DNS.1 and IP.1 entries in `openssl.cnf` to match the environment:
+    ```
+    ...
+    CN=registry.example.com
+    ...
     [alt_names]
     DNS.1 = registry.example.com
+    #DNS.2 = node123.example.com
     IP.1 = 192.168.1.25
     ```
 - Generate SSL cert for Quay:

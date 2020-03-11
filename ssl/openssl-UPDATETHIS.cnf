@@ -1,0 +1,28 @@
+[ req ]
+default_bits = 2048
+default_md = sha256
+prompt = no
+distinguished_name = req_distinguished_name
+req_extensions = req_ext
+
+[ req_distinguished_name ]
+# Country
+C=US
+# State
+ST=MD
+# City/Location
+L=Columbia
+# Organization
+O=Quay Basic Lab
+# Organization Unite
+OU=Quay Registry
+# CommonName (FQDN)
+CN=registry.example.com
+
+[ req_ext ]
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = registry.example.com
+#DNS.2 = node123.example.com
+IP.1 = 192.168.1.25
