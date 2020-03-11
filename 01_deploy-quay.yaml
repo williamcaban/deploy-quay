@@ -67,14 +67,19 @@
     with_items:
       - quay-mysql.service 
       - quay-redis.service 
-  
+
+  - name: pulling quay image (This step takes time because it is a huge image)
+    shell: |
+      echo "Pulling Quay container image"
+      podman pull --authfile {{ quayio_config }} \
+      quay.io/redhat/quay:v3.2.1
+
   - name: run quay registry in config mode -- using password {{ quay_config_pass }}
     shell: |
-      echo "Pulling and running Quay container"
       podman run -d --restart=always \
       --authfile {{ quayio_config }} \
       --name quay-config -p 8443:8443 \
-      quay.io/redhat/quay:v3.2.0 config {{ quay_config_pass }}
+      quay.io/redhat/quay:v3.2.1 config {{ quay_config_pass }}
 
 #####################################################################
 # END OF FILE

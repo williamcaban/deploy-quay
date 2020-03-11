@@ -105,7 +105,7 @@ The documented steps assumes:
     sudo podman kill quay-config
     sudo podman rm quay-config
     ```
-- Execute playbook to configure and run Quay registry
+- Execute playbook to load configuration and run Quay registry
     ```
     ansible-playbook ./02_run-quay.yaml
     ```
