@@ -73,7 +73,7 @@
       echo "Pulling and running Quay container"
       podman run -d --restart=always \
       --authfile {{ quayio_config }} \
-      --name quay-registry -p 8443:8443 \
+      --name quay-config -p 8443:8443 \
       quay.io/redhat/quay:v3.2.0 config {{ quay_config_pass }}
 
 #####################################################################

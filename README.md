@@ -27,7 +27,7 @@ The documented steps assumes:
     ```
     ansible-playbook ./01_deploy-quay.yaml
     ```
-- Identify the internal IP Address of the `quay-mysql` and `quay-redis` containers:
+- Identify the internal IP Address of the `quay-mysql` and `quay-redis` containers. (Take note of these IPs for later use):
     ```
     sudo podman inspect quay-mysql --format {{.NetworkSettings.IPAddress}}
     sudo podman inspect quay-redis --format {{.NetworkSettings.IPAddress}}
@@ -52,13 +52,62 @@ The documented steps assumes:
     ```
 - Generate SSL cert for Quay:
     ```
-    ./01_generate-ssl-cert.sh
+    # Execute the script to generate keys and certificates
+    $ ./01_generate-ssl-cert.sh
+
+    Creating root CA
+    Generating RSA private key, 2048 bit long modulus (2 primes)
+    ................................................................................................+++++
+    ....................................................+++++
+    e is 65537 (0x010001)
+    Create CSR and private key
+    Generating a RSA private key
+    ......+++++
+    .................+++++
+    writing new private key to 'ssl.key'
+    -----
+    Signing the certificate
+    Signature ok
+    subject=C = US, ST = MD, L = Columbia, O = Quay Basic Lab, OU = Quay Registry, CN = registry.example.com
+    Getting CA Private Key
+
+    # Validate all keys certificates have been created
+    $ ls -1
+    01_generate-ssl-cert.sh
+    openssl.cnf
+    openssl-UPDATETHIS.cnf
+    rootCA.key
+    rootCA.pem
+    rootCA.srl
+    ssl.cert
+    ssl.csr
+    ssl.key
     ```
-- Access the Quay configuration interfaces from `https://<your-vm-ip-or-fqdn>:8443`. Username `quayconfig` with password `quayconfig`
-- Follow the wizard to create a new configuration and downlaod the resulting `quay-config.tar.gz` to the working directory (the one with the Ansible playbooks)
+- Access the Quay configuration interfaces from `https://registry.example.com:8443`.
+- Login using Username `quayconfig` with password `quayconfig`
+- Follow the wizard to create a new configuration
+    ```
+    # Variables for Database connection
+    Database Type: MySQL
+    Database Server: <ip address of quay-mysql from previous step>
+    Username: quayuser
+    Password: quaypass
+    Database Name: quaydb
+    ```
+    - Click "Verify Connection"
+    - Setup the information and create a super user
+    - Setup the Quay configuration providing the ssl keys certificates (Note: Rename `rootCA.pem` to `rootCA.crt` for the wizard to accept it)
+    - Specify the redis server
+    - Generate the configuration
+-  Downlaod the resulting `quay-config.tar.gz` to the working directory (the one with the Ansible playbooks)
+-  Stop and remove the quay config container
+    ```
+    sudo podman kill quay-config
+    sudo podman rm quay-config
+    ```
 - Execute playbook to configure and run Quay registry
     ```
-    ansible-playbook ./02-run-quay.yaml
+    ansible-playbook ./02_run-quay.yaml
     ```
 
 ## Credits

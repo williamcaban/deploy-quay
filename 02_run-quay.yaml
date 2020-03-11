@@ -18,9 +18,9 @@
       - /opt/quay/storage
 
   - name: copy {{ quayio_config }} into /opt/quay
-    copy: src={{ item }} dest=/opt/quay/
+    copy: src="{{ item }}" dest=/opt/quay/
     with_items:
-      - {{ quayio_config }}
+      - "{{ quayio_config }}"
 
   - name: extract "quay-config.tar.gz" into /opt/quay/config
     # Extract files into config folder: config.yaml ssl.cert ssl.key
@@ -31,7 +31,7 @@
   - name: start and enable Quay registry
     systemd:
       state: started
-      name: {{ item }}  
+      name: "{{ item }}"  
       enabled: yes
     with_items:
       - quay-redis.service
