@@ -2,6 +2,12 @@
 req_extensions = v3_req
 distinguished_name = req_distinguished_name
 [req_distinguished_name]
+countryName_default             = US
+stateOrProvinceName_default     = MD
+localityName_default            = Columbia
+0.organizationName_default      = Quay Basic Lab
+organizationalUnitName_default  = Quay Registry
+emailAddress_default            = none@example.com
 [ v3_req ]
 basicConstraints = CA:FALSE
 keyUsage = nonRepudiation, digitalSignature, keyEncipherment

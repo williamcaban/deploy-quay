@@ -20,11 +20,6 @@
       name: '*'
       state: latest
 
-  - name: install podman-docker
-    yum:
-      name: podman-docker
-      state: latest 
-
   # - name: firewalld configuration
   #   firewalld:
   #     zone: public
