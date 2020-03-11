@@ -1,0 +1,32 @@
+# Copy (chmod 664) to /etc/systemd/system/quay-mysql.service
+#
+# systemctl daemon-reload
+# systemctl enable --now quay-mysql
+# systemctl status quay-mysql
+[Unit]
+Description=MySQL for Quay Registry 
+
+[Service]
+Restart=on-failure
+Environment=DB_ROOT_PASS=dbrootpass12345
+Environment=DB_USER=quayuser
+Environment=DB_PASS=quaypass 
+Environment=DB_QUAY=quaydb
+ExecStartPre=-mkdir -p /opt/quay/mysql
+ExecStartPre=/usr/bin/rm -f /%t/%n-pid /%t/%n-cid
+ExecStart=/usr/bin/podman run --conmon-pidfile  /%t/%n-pid  --cidfile /%t/%n-cid -d \
+        --name quay-mysql -p 3306:3306 \
+        -v /opt/quay/mysql:/var/lib/mysql/data:z \
+        -e MYSQL_ROOT_PASSWORD=${DB_ROOT_PASS} \
+        -e MYSQL_USER=${DB_USER} \
+        -e MYSQL_PASSWORD=${DB_PASS} \
+        -e MYSQL_DATABASE=${DB_QUAY} \
+        registry.access.redhat.com/rhscl/mysql-57-rhel7 
+
+ExecStop=/usr/bin/sh -c "/usr/bin/podman rm -f `cat /%t/%n-cid`"
+KillMode=none
+Type=forking
+PIDFile=/%t/%n-pid
+
+[Install]
+WantedBy=multi-user.target

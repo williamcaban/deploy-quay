@@ -1,0 +1,32 @@
+# Copy (chmod 664) to /etc/systemd/system/quay-registry.service
+#
+# systemctl daemon-reload
+# systemctl enable --now quay-registry
+# systemctl status quay-registry
+[Unit]
+Description=Quay Registry 
+Requires=quay-mysql.service
+After=quay-redis.service
+
+[Service]
+Restart=on-failure
+Environment=QUAYIO_CONFIG_JSON=/opt/quay/quay-v3-config.json
+ExecStartPre=-mkdir -p /opt/quay/{config,storage}
+ExecStartPre=test -f ${QUAYIO_CONFIG_JSON}
+ExecStartPre=/usr/bin/rm -f /%t/%n-pid /%t/%n-cid
+ExecStart=/usr/bin/podman run --conmon-pidfile  /%t/%n-pid  --cidfile /%t/%n-cid -d \
+            --name quay-registry -p 443:8443 -p 80:8080 \
+            --authfile ${QUAYIO_CONFIG_JSON} \
+            --sysctl net.core.somaxconn=4096 \
+            --privileged=true \
+            -v /opt/quay/config:/conf/stack:Z \
+            -v /opt/quay/storage:/datastorage:Z \
+            -d quay.io/redhat/quay:v3.2.1
+
+ExecStop=/usr/bin/sh -c "/usr/bin/podman rm -f `cat /%t/%n-cid`"
+KillMode=none
+Type=forking
+PIDFile=/%t/%n-pid
+
+[Install]
+WantedBy=multi-user.target

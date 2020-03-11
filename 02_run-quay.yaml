@@ -1,0 +1,43 @@
+---
+- hosts: localhost
+  vars:
+    # Obtain quay v2 config.json secret from https://access.redhat.com/solutions/3533201
+    quayio_config: quay-v3-config.json
+  gather_facts: no
+  connection: local
+  #remote_user: root
+  become: yes
+  tasks:
+  - name: create directories for Quay registry container
+    file:
+      path: "{{ item }}"
+      state: directory
+      mode: 0777
+    with_items:
+      - /opt/quay/config
+      - /opt/quay/storage
+
+  - name: copy {{ quayio_config }} into /opt/quay
+    copy: src={{ item }} dest=/opt/quay/
+    with_items:
+      - {{ quayio_config }}
+
+  - name: extract "quay-config.tar.gz" into /opt/quay/config
+    # Extract files into config folder: config.yaml ssl.cert ssl.key
+    unarchive:
+      src: quay-config.tar.gz
+      dest: /opt/quay/config/
+
+  - name: start and enable Quay registry
+    systemd:
+      state: started
+      name: {{ item }}  
+      enabled: yes
+    with_items:
+      - quay-redis.service
+      - quay-mysql.service
+      - quay-registry.service 
+
+#####################################################################
+# END OF FILE
+#####################################################################

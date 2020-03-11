@@ -1,0 +1,24 @@
+# Copy (chmod 664) to /etc/systemd/system/quay-redis.service
+#
+# systemctl daemon-reload
+# systemctl enable --now quay-redis
+# systemctl status quay-redis
+[Unit]
+Description=Redis for Quay Registry 
+
+[Service]
+Restart=on-failure
+ExecStartPre=-mkdir -p /opt/quay/redis
+ExecStartPre=/usr/bin/rm -f /%t/%n-pid /%t/%n-cid
+ExecStart=/usr/bin/podman run --conmon-pidfile  /%t/%n-pid  --cidfile /%t/%n-cid -d \
+      --name quay-redis -p 6379:6379 \
+      -v /opt/quay/redis:/var/lib/redis/data:z \
+      registry.access.redhat.com/rhscl/redis-32-rhel7 
+
+ExecStop=/usr/bin/sh -c "/usr/bin/podman rm -f `cat /%t/%n-cid`"
+KillMode=none
+Type=forking
+PIDFile=/%t/%n-pid
+
+[Install]
+WantedBy=multi-user.target

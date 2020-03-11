@@ -1,0 +1,86 @@
+---
+- hosts: localhost
+  vars:
+    quay_config_pass: quayconfig
+    # Obtain quay v2 config.json secret from https://access.redhat.com/solutions/3533201
+    quayio_config: quay-v3-config.json
+  gather_facts: no
+  connection: local
+  #remote_user: root
+  become: yes
+  tasks:
+  #- name: Register system with activationkey
+  #  redhat_subscription:
+  #    state: present
+  #    activationkey: keyname
+  #    org_id: orgname
+
+  - name: upgrade all packages
+    yum:
+      name: '*'
+      state: latest
+
+  - name: install podman-docker
+    yum:
+      name: podman-docker
+      state: latest 
+
+  # - name: firewalld configuration
+  #   firewalld:
+  #     zone: public
+  #     port: "{{ item }}"
+  #     permanent: yes
+  #     state: enable
+  #   notify: reload firewalld
+  #   loop:
+      # - 8443/tcp
+      # - 80/tcp 
+      # - 443/tcp 
+      # - 3306/tcp
+      # - 6379/tcp
+
+  - name: add port 80 to firewall trusted zone
+    iptables:
+      chain: INPUT
+      protocol: tcp
+      destination_port: {{ item }}
+      jump: ACCEPT
+      action: insert
+    loop:
+      - 8443
+      - 80 
+      - 443 
+      - 3306
+      - 6379
+
+  - name: copy {{ quayio_config }} into /opt/quay
+    copy: src=./systemd/{{ item }} dest=/etc/systemd/system/
+    with_items:
+      - quay-mysql.service 
+      - quay-redis.service 
+      - quay-registry.service
+
+  - name: force systemd to reread configs
+    systemd:
+      daemon_reload: yes
+
+  - name: start and enable Quay dependencies
+    systemd:
+      state: started
+      name: {{ item }}  
+      enabled: yes
+    with_items:
+      - quay-mysql.service 
+      - quay-redis.service 
+  
+  - name: run quay registry in config mode -- using password {{ quay_config_pass }}
+    shell: |
+      echo "Pulling and running Quay container"
+      podman run -d --restart=always \
+      --authfile {{ quayio_config }} \
+      --name quay-registry -p 8443:8443 \
+      quay.io/redhat/quay:v3.2.0 config {{ quay_config_pass }}
+
+#####################################################################
+# END OF FILE
+#####################################################################
