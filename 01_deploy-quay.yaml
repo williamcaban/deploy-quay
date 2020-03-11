@@ -43,7 +43,7 @@
     iptables:
       chain: INPUT
       protocol: tcp
-      destination_port: {{ item }}
+      destination_port: "{{ item }}"
       jump: ACCEPT
       action: insert
     loop:
@@ -67,7 +67,7 @@
   - name: start and enable Quay dependencies
     systemd:
       state: started
-      name: {{ item }}  
+      name: "{{ item }}"  
       enabled: yes
     with_items:
       - quay-mysql.service 

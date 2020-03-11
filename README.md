@@ -14,6 +14,10 @@ The documented steps assumes:
   ```
   sudo yum -y install ansible
   ```
+- Git clone this repo
+  ```
+  git clone https://github.com/williamcaban/deploy-quay.git
+  ```
 
 ## Steps
 
