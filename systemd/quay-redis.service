@@ -12,7 +12,7 @@ ExecStartPre=-mkdir -p /opt/quay/redis
 ExecStartPre=/usr/bin/rm -f /%t/%n-pid /%t/%n-cid
 ExecStart=/usr/bin/podman run --conmon-pidfile  /%t/%n-pid  --cidfile /%t/%n-cid -d \
       --name quay-redis -p 6379:6379 \
-      -v /opt/quay/redis:/var/lib/redis/data:z \
+      -v /opt/quay/redis:/var/lib/redis/data:Z \
       registry.access.redhat.com/rhscl/redis-32-rhel7 
 
 ExecStop=/usr/bin/sh -c "/usr/bin/podman rm -f `cat /%t/%n-cid`"
