@@ -5,7 +5,12 @@ Simplify systemd podman containers dpeloying a Basic Quay Registry
 ## Prerequisites
 
 The documented steps assumes:
-- New RHEL 8.1 server with a valid subscription
+- New RHEL VM with:
+  - RHEL 8.1 with a valid subscription
+  - 2 vCPU
+  - 4 GB+ of RAM
+  - 50 GB+ Disk
+  
 - Enable repo for Ansible Core
   ```
   sudo subscription-manager repos --enable ansible-2.9-for-rhel-8-x86_64-rpms
@@ -97,9 +102,11 @@ The documented steps assumes:
     - Click "Verify Connection"
     - Setup the information and create a super user
     - Setup the Quay configuration providing the ssl keys certificates (Note: Rename `rootCA.pem` to `rootCA.crt` for the wizard to accept it)
-    - Specify the redis server
+    - Specify the redis server (IP from previous step)
+      - Note: redis server with no password
     - Generate the configuration
 -  Downlaod the resulting `quay-config.tar.gz` to the working directory (the one with the Ansible playbooks)
+-  Complete instruction on the wizard
 -  Stop and remove the quay config container
     ```
     sudo podman kill quay-config
@@ -109,6 +116,7 @@ The documented steps assumes:
     ```
     ansible-playbook ./02_run-quay.yaml
     ```
+- Access the registry at `https://fqdn-your-registry-vm`
 
 ## Credits
 

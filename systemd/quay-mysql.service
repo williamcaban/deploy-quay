@@ -13,7 +13,6 @@ Environment=DB_USER=quayuser
 Environment=DB_PASS=quaypass 
 Environment=DB_QUAY=quaydb
 ExecStartPre=-mkdir -p -m 777 /opt/quay/mysql
-ExecStartPre=-chmod 777
 ExecStartPre=/usr/bin/rm -f /%t/%n-pid /%t/%n-cid
 ExecStart=/usr/bin/podman run --conmon-pidfile  /%t/%n-pid  --cidfile /%t/%n-cid -d \
         --name quay-mysql -p 3306:3306 \
