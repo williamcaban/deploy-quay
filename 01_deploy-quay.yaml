@@ -85,6 +85,18 @@
       - quay-mysql.service 
       - quay-redis.service 
 
+  - name: fixing mysql user (workaround mysql container bug)
+    shell: |
+      podman exec -ti quay-mysql bash -c 'mysql -uroot -e "select User,Host from mysql.user;"'
+
+      cat <<EOF >> /opt/quay/mysql/fixuser.sql
+      GRANT ALL PRIVILEGES ON quaydb.* TO 'quayuser'@'%' IDENTIFIED BY 'quaypass';
+      FLUSH PRIVILEGES;
+      EOF
+
+      podman exec -ti quay-mysql bash -c 'mysql -uroot < /var/lib/mysql/data/fixuser.sql'
+      podman exec -ti quay-mysql bash -c 'mysql -uroot -e "select User,Host from mysql.user;"'
+
   - name: pulling quay image (This step takes time because it is a huge image)
     shell: |
       echo "Pulling Quay container image"
