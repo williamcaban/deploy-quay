@@ -8,7 +8,7 @@ Description=Redis for Quay Registry
 
 [Service]
 Restart=on-failure
-ExecStartPre=-mkdir -p /opt/quay/redis
+ExecStartPre=-mkdir -p -m 777 /opt/quay/redis
 ExecStartPre=/usr/bin/rm -f /%t/%n-pid /%t/%n-cid
 ExecStart=/usr/bin/podman run --conmon-pidfile  /%t/%n-pid  --cidfile /%t/%n-cid -d \
       --name quay-redis -p 6379:6379 \

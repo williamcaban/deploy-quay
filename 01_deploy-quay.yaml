@@ -15,10 +15,10 @@
   #    activationkey: keyname
   #    org_id: orgname
 
-  - name: upgrade all packages
-    yum:
-      name: '*'
-      state: latest
+  # - name: upgrade all packages
+  #   yum:
+  #     name: '*'
+  #     state: latest
 
   # - name: firewalld configuration
   #   firewalld:
@@ -48,18 +48,35 @@
       - 3306
       - 6379
 
+
+  - name: create directories for Quay registry container
+    file:
+      path: "{{ item }}"
+      state: directory
+      mode: 0777
+    with_items:
+      - /opt/quay/mysql
+      - /opt/quay/redis
+      - /opt/quay/config
+      - /opt/quay/storage
+
   - name: copy {{ quayio_config }} into /opt/quay
+    copy: src={{ item }} dest=/opt/quay/
+    with_items:
+      - "{{ quayio_config }}"
+
+  - name: copy systemd podman services into systemd
     copy: src=./systemd/{{ item }} dest=/etc/systemd/system/
     with_items:
       - quay-mysql.service 
       - quay-redis.service 
       - quay-registry.service
 
-  - name: force systemd to reread configs
+  - name: force systemd reload to reread configs
     systemd:
       daemon_reload: yes
 
-  - name: start and enable Quay dependencies
+  - name: start and enable Quay dependencies (mysql and redis)
     systemd:
       state: started
       name: "{{ item }}"  
